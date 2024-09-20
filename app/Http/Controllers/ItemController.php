@@ -23,10 +23,10 @@ class ItemController extends Controller
     public function createProduct()
     {
         // Fetch types from the 'types' table with id and name
-        $types = DB::table('types')->pluck('name', 'id'); 
-        return view('additem', compact('types'));
+        $types = DB::table('types')->pluck('name', 'id');
+        return view('addItem', compact('types'));
     }
-    
+
     protected function createNewType($typeName)
     {
         $type = DB::table('types')->where('name', $typeName)->first();
@@ -35,7 +35,7 @@ class ItemController extends Controller
         } else {
             $typeId = $type->id;
         }
-    
+
         return $typeId;
     }
 
@@ -114,19 +114,19 @@ class ItemController extends Controller
          ->select('products.*', 'types.name as type_name')
          ->where('products.id', $id)
          ->first();
- 
+
      if (!$product) {
          return redirect()->route('index_home')->with('error', 'Product not found.');
      }
- 
+
      return view('showProductDetail', compact('product'));
  }
- 
+
 
  public function editProduct($id)
  {
      $product = Product::findOrFail($id);
-     $types = DB::table('types')->pluck('name', 'id'); 
+     $types = DB::table('types')->pluck('name', 'id');
      return view('editProduct', compact('product', 'types'));
  }
  public function updateProduct(Request $request, $id)
@@ -142,8 +142,8 @@ class ItemController extends Controller
         'expired_date' => 'nullable|date',
         'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
     ]);
- 
-     
+
+
     $product = Product::findOrFail($id);
 
     // Determine the type ID
@@ -173,7 +173,7 @@ class ItemController extends Controller
         $image->storeAs('public/images', $imageName);
         $product->image = $imageName;
     }
- 
+
     if ($product->isDirty()) {
         History::create([
             'user_id' => Auth::id(),
@@ -192,7 +192,7 @@ class ItemController extends Controller
     public function deleteProduct($id)
     {
     $product = Product::findOrFail($id);
-    $typeId = $product->type_id; 
+    $typeId = $product->type_id;
     History::create([
         'user_id' => Auth::id(),
         'product_id' => $product->id,
@@ -220,32 +220,32 @@ class ItemController extends Controller
 }
 
 
-    
+
     public function showCheckoutPage()
     {
         $products = DB::table('products')
         ->join('users', 'products.user_id', '=', 'users.id')
         ->where('user_id','=',Auth::user()->id)
-        ->select('products.*') 
+        ->select('products.*')
         ->paginate(5);
         return view('checkout', compact('products'));
     }
 
-    
-    
+
+
     public function addStockPage()
     {
         $products = DB::table('products')
         ->join('users', 'products.user_id', '=', 'users.id')
         ->where('user_id','=',Auth::user()->id)
-        ->select('products.*') 
+        ->select('products.*')
         ->paginate(5);
         return view('addStock', compact('products'));
     }
 
     public function processAddStock(Request $request)
     {
-        
+
         $changes = [];
         foreach ($request->products as $productData) {
             $product = Product::findOrFail($productData['id']);
